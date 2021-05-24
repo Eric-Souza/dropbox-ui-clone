@@ -2,31 +2,42 @@ import React, { useState, useEffect } from 'react';
 
 import { Container } from './styles';
 
-const scrollThreshold = 300
+declare global {
+  interface Window {
+    toggleActiveMenu: (() => void) | undefined;
+  }
+}
 
-const SideMenu: React.FC = ({children}) => {
-  const [scrollY, setScrollY] = useState(0)
-  const [isActive, setIsActive] = useState(false)
+const scrollThreshold = 300;
+
+const SideMenu: React.FC = ({ children }) => {
+  const [isActive, setIsActive] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
-    function onScroll () {
-      setScrollY(window.scrollY)
-      setIsActive(false)
+    function onScroll() {
+      setScrollY(window.scrollY);
+      setIsActive(false);
     }
 
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll);
 
-    return window.removeEventListener('scroll', onScroll)
-  }, [])
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [scrollY]);
 
   const classes = [
     isActive ? 'open' : '',
-    scrollY <= scrollThreshold ? 'scrollOpen': ''
-  ]
+    scrollY <= scrollThreshold ? 'scrollOpen' : '',
+  ];
+  const className = classes.join(' ').trim();
 
-  const className = classes.join(' ').trim()
+  function toggleActiveMenu() {
+    setIsActive((prev) => !prev);
+  }
 
-  return <Container className={className}> {children} </Container>
-}
+  window.toggleActiveMenu = toggleActiveMenu;
+
+  return <Container className={className}>{children}</Container>;
+};
 
 export default SideMenu;
